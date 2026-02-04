@@ -1,0 +1,176 @@
+import { Play, FileText, Presentation, Coins } from "lucide-react";
+import { useAppStore } from "@/stores/useAppStore";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+
+interface ExploreItem {
+  id: string;
+  title: string;
+  type: "video" | "pdf" | "slides" | "template";
+  thumbnail: string;
+  price: number;
+  creator: string;
+}
+
+// Mock data for the explore section
+const mockItems: ExploreItem[] = [
+  {
+    id: "1",
+    title: "Calculus Fundamentals Mind Map",
+    type: "template",
+    thumbnail: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=300&fit=crop",
+    price: 25,
+    creator: "MathPro",
+  },
+  {
+    id: "2",
+    title: "World War II Complete Notes",
+    type: "pdf",
+    thumbnail: "https://images.unsplash.com/photo-1461360370896-922624d12a74?w=400&h=300&fit=crop",
+    price: 15,
+    creator: "HistoryBuff",
+  },
+  {
+    id: "3",
+    title: "Biology Cell Division",
+    type: "video",
+    thumbnail: "https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?w=400&h=300&fit=crop",
+    price: 30,
+    creator: "ScienceSimplified",
+  },
+  {
+    id: "4",
+    title: "Physics Formulas Deck",
+    type: "slides",
+    thumbnail: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=300&fit=crop",
+    price: 20,
+    creator: "PhysicsGeek",
+  },
+  {
+    id: "5",
+    title: "Psychology 101 Summary",
+    type: "pdf",
+    thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop",
+    price: 10,
+    creator: "MindMatters",
+  },
+  {
+    id: "6",
+    title: "Organic Chemistry Reactions",
+    type: "video",
+    thumbnail: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400&h=300&fit=crop",
+    price: 35,
+    creator: "ChemistryKing",
+  },
+];
+
+const typeIcons = {
+  video: Play,
+  pdf: FileText,
+  slides: Presentation,
+  template: FileText,
+};
+
+const typeColors = {
+  video: "bg-red-500",
+  pdf: "bg-blue-500",
+  slides: "bg-green-500",
+  template: "bg-purple-500",
+};
+
+export function ExploreView() {
+  const { coins, spendCoins } = useAppStore();
+  const { toast } = useToast();
+
+  const handleBuy = (item: ExploreItem) => {
+    if (spendCoins(item.price)) {
+      toast({
+        title: "Purchase Successful! 🎉",
+        description: `You bought "${item.title}" for ${item.price} coins.`,
+      });
+    } else {
+      toast({
+        title: "Not Enough Coins",
+        description: `You need ${item.price - coins} more coins to buy this.`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="h-full overflow-auto bg-paper p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-ink">Explore</h1>
+        <p className="mt-2 text-ink-light">
+          Discover study materials from the community
+        </p>
+      </div>
+
+      {/* Categories */}
+      <div className="mb-6 flex gap-2">
+        {["All", "Videos", "PDFs", "Slides", "Templates"].map((category) => (
+          <Button
+            key={category}
+            variant={category === "All" ? "default" : "outline"}
+            size="sm"
+            className={category === "All" ? "bg-spark hover:bg-spark/90" : ""}
+          >
+            {category}
+          </Button>
+        ))}
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {mockItems.map((item) => {
+          const Icon = typeIcons[item.type];
+          return (
+            <Card
+              key={item.id}
+              className="group overflow-hidden bg-paper-elevated shadow-desk transition-all hover:shadow-dock hover:-translate-y-1"
+            >
+              {/* Thumbnail */}
+              <div className="relative aspect-video overflow-hidden">
+                <img
+                  src={item.thumbnail}
+                  alt={item.title}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                />
+                <Badge
+                  className={`absolute left-2 top-2 ${typeColors[item.type]} text-white border-0`}
+                >
+                  <Icon className="mr-1 h-3 w-3" />
+                  {item.type}
+                </Badge>
+              </div>
+
+              <CardContent className="p-4">
+                <h3 className="mb-1 font-semibold text-ink line-clamp-2">
+                  {item.title}
+                </h3>
+                <p className="mb-3 text-sm text-ink-light">by {item.creator}</p>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-spark">
+                    <Coins className="h-4 w-4" />
+                    <span className="font-semibold">{item.price}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleBuy(item)}
+                    className="bg-spark hover:bg-spark/90"
+                  >
+                    Buy
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
