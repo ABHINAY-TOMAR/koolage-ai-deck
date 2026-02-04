@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +61,30 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Kolage custom colors
+        paper: {
+          DEFAULT: "hsl(var(--paper))",
+          elevated: "hsl(var(--paper-elevated))",
+          grid: "hsl(var(--paper-grid))",
+        },
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          light: "hsl(var(--ink-light))",
+          faint: "hsl(var(--ink-faint))",
+        },
+        spark: {
+          DEFAULT: "hsl(var(--spark))",
+          glow: "hsl(var(--spark-glow))",
+          muted: "hsl(var(--spark-muted))",
+        },
+        neon: {
+          DEFAULT: "hsl(var(--neon))",
+          muted: "hsl(var(--neon-muted))",
+        },
+        fire: {
+          start: "hsl(var(--fire-start))",
+          end: "hsl(var(--fire-end))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,20 +93,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
