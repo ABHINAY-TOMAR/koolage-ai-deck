@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { DataGrid, Column } from 'react-data-grid';
-import 'react-data-grid/lib/index.css';
+import 'react-data-grid/lib/styles.css';
 import { Plus, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
