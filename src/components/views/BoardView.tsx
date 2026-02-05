@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { WhiteboardTab, SlideTab, PageTab, SheetTab } from "@/components/board";
 
 const tabTypeIcons: Record<BoardTabType, typeof PenTool> = {
   whiteboard: PenTool,
@@ -91,10 +92,10 @@ export function BoardView() {
       <div className="flex-1 overflow-hidden">
         {activeTab ? (
           <div className="h-full">
-            {activeTab.type === "whiteboard" && <WhiteboardPlaceholder />}
-            {activeTab.type === "slide" && <SlidePlaceholder />}
-            {activeTab.type === "page" && <PagePlaceholder />}
-            {activeTab.type === "sheet" && <SheetPlaceholder />}
+            {activeTab.type === "whiteboard" && <WhiteboardTab tabId={activeTab.id} />}
+            {activeTab.type === "slide" && <SlideTab tabId={activeTab.id} />}
+            {activeTab.type === "page" && <PageTab tabId={activeTab.id} />}
+            {activeTab.type === "sheet" && <SheetTab tabId={activeTab.id} />}
           </div>
         ) : (
           <EmptyBoardState onAddTab={addBoardTab} />
@@ -133,51 +134,3 @@ function EmptyBoardState({ onAddTab }: { onAddTab: (type: BoardTabType) => void 
   );
 }
 
-// Placeholder components - will be replaced with actual implementations
-function WhiteboardPlaceholder() {
-  return (
-    <div className="h-full dot-grid flex items-center justify-center">
-      <div className="text-center p-8 bg-paper-elevated rounded-2xl shadow-desk">
-        <PenTool className="h-12 w-12 mx-auto mb-4 text-spark" />
-        <h3 className="text-lg font-semibold mb-2">Whiteboard</h3>
-        <p className="text-sm text-muted-foreground">React Flow canvas coming soon...</p>
-      </div>
-    </div>
-  );
-}
-
-function SlidePlaceholder() {
-  return (
-    <div className="h-full bg-secondary/30 flex items-center justify-center">
-      <div className="text-center p-8 bg-paper-elevated rounded-2xl shadow-desk">
-        <Presentation className="h-12 w-12 mx-auto mb-4 text-spark" />
-        <h3 className="text-lg font-semibold mb-2">Slides</h3>
-        <p className="text-sm text-muted-foreground">Slide deck editor coming soon...</p>
-      </div>
-    </div>
-  );
-}
-
-function PagePlaceholder() {
-  return (
-    <div className="h-full flex items-center justify-center">
-      <div className="text-center p-8 bg-paper-elevated rounded-2xl shadow-desk">
-        <FileText className="h-12 w-12 mx-auto mb-4 text-spark" />
-        <h3 className="text-lg font-semibold mb-2">Page</h3>
-        <p className="text-sm text-muted-foreground">Tiptap editor coming soon...</p>
-      </div>
-    </div>
-  );
-}
-
-function SheetPlaceholder() {
-  return (
-    <div className="h-full bg-secondary/20 flex items-center justify-center">
-      <div className="text-center p-8 bg-paper-elevated rounded-2xl shadow-desk">
-        <Table className="h-12 w-12 mx-auto mb-4 text-spark" />
-        <h3 className="text-lg font-semibold mb-2">Sheet</h3>
-        <p className="text-sm text-muted-foreground">Data grid coming soon...</p>
-      </div>
-    </div>
-  );
-}
