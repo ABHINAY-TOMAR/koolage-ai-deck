@@ -34,8 +34,10 @@ interface AppState {
   // Floating Dock
   dockVisible: boolean;
   dockContent: { type: 'youtube' | 'tts'; url?: string; text?: string } | null;
+  dockPosition: { x: number; y: number; width: number; height: number } | null;
   showDock: (content: { type: 'youtube' | 'tts'; url?: string; text?: string }) => void;
   hideDock: () => void;
+  updateDockPosition: (position: { x: number; y: number; width: number; height: number }) => void;
   
   // Gamification (mock data for now)
   coins: number;
@@ -111,8 +113,10 @@ export const useAppStore = create<AppState>()(
       // Floating Dock
       dockVisible: false,
       dockContent: null,
+      dockPosition: null,
       showDock: (content) => set({ dockVisible: true, dockContent: content }),
       hideDock: () => set({ dockVisible: false, dockContent: null }),
+      updateDockPosition: (position) => set({ dockPosition: position }),
       
       // Gamification
       coins: 100, // Start with 100 mock coins

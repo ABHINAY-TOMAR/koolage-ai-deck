@@ -1,7 +1,22 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Download, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Download, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAI } from '@/hooks/useAI';
 
 interface Slide {
   id: string;
@@ -15,6 +30,8 @@ interface SlideTabProps {
   onSave?: (slides: Slide[]) => void;
 }
 
+type SlideStyle = 'professional' | 'creative' | 'academic';
+
 export function SlideTab({ tabId, initialSlides = [], onSave }: SlideTabProps) {
   const [slides, setSlides] = useState<Slide[]>(
     initialSlides.length > 0
@@ -22,6 +39,10 @@ export function SlideTab({ tabId, initialSlides = [], onSave }: SlideTabProps) {
       : [{ id: '1', title: 'Title Slide', content: 'Subtitle goes here' }]
   );
   const [activeSlideId, setActiveSlideId] = useState(slides[0]?.id || '1');
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [topic, setTopic] = useState('');
+  const [style, setStyle] = useState<SlideStyle>('professional');
+  const { generateSlides, isLoading } = useAI();
 
   const activeSlide = slides.find((s) => s.id === activeSlideId);
 
@@ -58,9 +79,20 @@ export function SlideTab({ tabId, initialSlides = [], onSave }: SlideTabProps) {
     alert('Export to PPTX coming in Phase 3');
   };
 
-  const generateDeck = () => {
-    // Placeholder for AI integration
-    alert('AI Deck generation coming in Phase 3');
+  const handleGenerateDeck = async () => {
+    if (!topic.trim()) return;
+    
+    setShowGenerateModal(false);
+    
+    const result = await generateSlides(topic, style);
+    
+    if (result && result.slides.length > 0) {
+      setSlides(result.slides);
+      setActiveSlideId(result.slides[0].id);
+      onSave?.(result.slides);
+    }
+    
+    setTopic('');
   };
 
   return (
@@ -103,11 +135,16 @@ export function SlideTab({ tabId, initialSlides = [], onSave }: SlideTabProps) {
           <Button
             variant="default"
             size="sm"
-            onClick={generateDeck}
+            onClick={() => setShowGenerateModal(true)}
+            disabled={isLoading}
             className="gap-2 bg-spark hover:bg-spark/90 text-accent-foreground"
           >
-            <Sparkles className="h-4 w-4" />
-            Generate Deck
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {isLoading ? 'Generating...' : 'Generate Deck'}
           </Button>
           <Button
             variant="outline"
@@ -156,6 +193,48 @@ export function SlideTab({ tabId, initialSlides = [], onSave }: SlideTabProps) {
           </div>
         )}
       </div>
+
+      {/* Generate Modal */}
+      <Dialog open={showGenerateModal} onOpenChange={setShowGenerateModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-spark" />
+              Generate Slide Deck
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input
+              placeholder="Enter your presentation topic"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              autoFocus
+            />
+            <Select value={style} onValueChange={(v) => setStyle(v as SlideStyle)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="professional">Professional</SelectItem>
+                <SelectItem value="creative">Creative</SelectItem>
+                <SelectItem value="academic">Academic</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGenerateModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleGenerateDeck} 
+              disabled={!topic.trim() || isLoading}
+              className="bg-spark hover:bg-spark/90 text-accent-foreground"
+            >
+              Generate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

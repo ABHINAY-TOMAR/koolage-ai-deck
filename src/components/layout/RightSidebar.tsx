@@ -3,14 +3,16 @@ import {
   Wand2,
   Download,
   Share2,
-  X
+  X,
+  Youtube,
+  Speech
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
 import { Button } from "@/components/ui/button";
 
 export function RightSidebar() {
-  const { rightSidebarOpen, setRightSidebarOpen, mode, activeTabId, boardTabs } = useAppStore();
+  const { rightSidebarOpen, setRightSidebarOpen, mode, activeTabId, boardTabs, showDock } = useAppStore();
   
   const activeTab = boardTabs.find(t => t.id === activeTabId);
   
@@ -43,10 +45,32 @@ export function RightSidebar() {
       }
     }
     
-    // Default tools
+    // Default tools - always show dock options
     return [
+      { icon: Youtube, label: 'Open Video', action: 'open-video' },
+      { icon: Speech, label: 'Text to Speech', action: 'open-tts' },
       { icon: Share2, label: 'Share', action: 'share' },
     ];
+  };
+
+  const handleToolClick = (action: string) => {
+    switch (action) {
+      case 'open-video':
+        const videoUrl = prompt('Enter YouTube URL:');
+        if (videoUrl) {
+          showDock({ type: 'youtube', url: videoUrl });
+        }
+        break;
+      case 'open-tts':
+        const textToRead = prompt('Enter text to read aloud:');
+        if (textToRead) {
+          showDock({ type: 'tts', text: textToRead });
+        }
+        break;
+      default:
+        // Other actions can be added later
+        break;
+    }
   };
 
   const tools = getContextTools();
@@ -71,6 +95,7 @@ export function RightSidebar() {
             key={tool.action}
             variant="outline"
             className="w-full justify-start gap-3"
+            onClick={() => handleToolClick(tool.action)}
           >
             <tool.icon className="h-4 w-4 text-spark" />
             <span>{tool.label}</span>
