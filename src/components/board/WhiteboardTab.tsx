@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -10,8 +10,17 @@ import ReactFlow, {
   Background,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Plus, Sparkles } from 'lucide-react';
+import { Plus, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { useAI } from '@/hooks/useAI';
 
 interface WhiteboardTabProps {
   tabId: string;
@@ -20,9 +29,24 @@ interface WhiteboardTabProps {
   onSave?: (nodes: Node[], edges: Edge[]) => void;
 }
 
+// Node styling based on design system
+const getNodeStyle = (isCenter: boolean) => ({
+  background: isCenter ? 'hsl(var(--spark))' : 'hsl(var(--paper-elevated))',
+  color: isCenter ? 'hsl(var(--accent-foreground))' : 'hsl(var(--foreground))',
+  border: isCenter ? 'none' : '2px solid hsl(var(--border))',
+  borderRadius: '0.75rem',
+  padding: isCenter ? '12px' : '10px',
+  fontWeight: isCenter ? 'bold' : 'normal',
+  fontSize: '12px',
+  fontFamily: 'Inter, sans-serif',
+});
+
 export function WhiteboardTab({ tabId, initialNodes = [], initialEdges = [], onSave }: WhiteboardTabProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [showTopicModal, setShowTopicModal] = useState(false);
+  const [topic, setTopic] = useState('');
+  const { generateMindMap, isLoading } = useAI();
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -46,66 +70,31 @@ export function WhiteboardTab({ tabId, initialNodes = [], initialEdges = [], onS
       id: `node-${Date.now()}`,
       data: { label: 'New Node' },
       position: { x: Math.random() * 250, y: Math.random() * 250 },
-      style: {
-        background: 'hsl(var(--paper-elevated))',
-        border: '2px solid hsl(var(--border))',
-        borderRadius: '0.75rem',
-        padding: '10px',
-        fontSize: '12px',
-        fontFamily: 'Inter, sans-serif',
-      },
+      style: getNodeStyle(false),
     };
     setNodes([...nodes, newNode]);
   };
 
-  const generateMap = () => {
-    // Mock AI call - placeholder for Lovable AI integration
-    const mockNodes: Node[] = [
-      {
-        id: '1',
-        data: { label: 'Topic' },
-        position: { x: 250, y: 0 },
-        style: {
-          background: 'hsl(var(--spark))',
-          color: 'hsl(var(--accent-foreground))',
-          border: 'none',
-          borderRadius: '0.75rem',
-          padding: '12px',
-          fontWeight: 'bold',
-        },
-      },
-      {
-        id: '2',
-        data: { label: 'Subtopic 1' },
-        position: { x: 100, y: 100 },
-        style: {
-          background: 'hsl(var(--paper-elevated))',
-          border: '2px solid hsl(var(--border))',
-          borderRadius: '0.75rem',
-          padding: '10px',
-        },
-      },
-      {
-        id: '3',
-        data: { label: 'Subtopic 2' },
-        position: { x: 400, y: 100 },
-        style: {
-          background: 'hsl(var(--paper-elevated))',
-          border: '2px solid hsl(var(--border))',
-          borderRadius: '0.75rem',
-          padding: '10px',
-        },
-      },
-    ];
-
-    const mockEdges: Edge[] = [
-      { id: 'e1-2', source: '1', target: '2' },
-      { id: 'e1-3', source: '1', target: '3' },
-    ];
-
-    setNodes(mockNodes);
-    setEdges(mockEdges);
-    onSave?.(mockNodes, mockEdges);
+  const handleGenerateMap = async () => {
+    if (!topic.trim()) return;
+    
+    setShowTopicModal(false);
+    
+    const result = await generateMindMap(topic);
+    
+    if (result) {
+      // Style the nodes appropriately
+      const styledNodes = result.nodes.map((node, index) => ({
+        ...node,
+        style: getNodeStyle(index === 0), // First node is center
+      }));
+      
+      setNodes(styledNodes);
+      setEdges(result.edges);
+      onSave?.(styledNodes, result.edges);
+    }
+    
+    setTopic('');
   };
 
   return (
@@ -124,11 +113,16 @@ export function WhiteboardTab({ tabId, initialNodes = [], initialEdges = [], onS
         <Button
           variant="default"
           size="sm"
-          onClick={generateMap}
+          onClick={() => setShowTopicModal(true)}
+          disabled={isLoading}
           className="gap-2 bg-spark hover:bg-spark/90 text-accent-foreground"
         >
-          <Sparkles className="h-4 w-4" />
-          Generate Map
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
+          {isLoading ? 'Generating...' : 'Generate Map'}
         </Button>
       </div>
 
@@ -145,6 +139,39 @@ export function WhiteboardTab({ tabId, initialNodes = [], initialEdges = [], onS
           <Controls />
         </ReactFlow>
       </div>
+
+      {/* Topic Modal */}
+      <Dialog open={showTopicModal} onOpenChange={setShowTopicModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-spark" />
+              Generate Mind Map
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input
+              placeholder="Enter a topic (e.g., 'Photosynthesis', 'World War II')"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleGenerateMap()}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTopicModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleGenerateMap} 
+              disabled={!topic.trim() || isLoading}
+              className="bg-spark hover:bg-spark/90 text-accent-foreground"
+            >
+              Generate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

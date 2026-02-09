@@ -1,6 +1,7 @@
 import { LeftSidebar } from "./LeftSidebar";
 import { TopNav } from "./TopNav";
 import { RightSidebar } from "./RightSidebar";
+import { FloatingDock } from "@/components/FloatingDock";
 import { useAppStore } from "@/stores/useAppStore";
 
 interface AppShellProps {
@@ -31,6 +32,9 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </main>
       </div>
+
+      {/* Floating Dock (PIP Window) */}
+      <FloatingDock />
     </div>
   );
 }
