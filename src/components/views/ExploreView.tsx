@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useGamificationStore } from "@/stores/useGamificationStore";
 
 interface ExploreItem {
   id: string;
@@ -83,9 +84,11 @@ const typeColors = {
 export function ExploreView() {
   const { coins, spendCoins } = useAppStore();
   const { toast } = useToast();
+  const { trackAction } = useGamificationStore();
 
   const handleBuy = (item: ExploreItem) => {
     if (spendCoins(item.price)) {
+      trackAction('explore');
       toast({
         title: "Purchase Successful! 🎉",
         description: `You bought "${item.title}" for ${item.price} coins.`,
