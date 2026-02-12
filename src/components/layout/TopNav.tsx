@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore, AppMode } from "@/stores/useAppStore";
+import { LevelBadge } from "@/components/gamification/LevelBadge";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -81,6 +82,9 @@ export function TopNav() {
             <p>{coins} coins available</p>
           </TooltipContent>
         </Tooltip>
+
+        {/* Level Badge */}
+        <LevelBadge compact />
 
         {/* Profile Avatar */}
         <Button variant="ghost" size="icon" className="rounded-full">

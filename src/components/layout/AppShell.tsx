@@ -2,6 +2,7 @@ import { LeftSidebar } from "./LeftSidebar";
 import { TopNav } from "./TopNav";
 import { RightSidebar } from "./RightSidebar";
 import { FloatingDock } from "@/components/FloatingDock";
+import { AchievementToast } from "@/components/gamification";
 import { useAppStore } from "@/stores/useAppStore";
 
 interface AppShellProps {
@@ -35,6 +36,9 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Floating Dock (PIP Window) */}
       <FloatingDock />
+      
+      {/* Achievement notifications */}
+      <AchievementToast />
     </div>
   );
 }

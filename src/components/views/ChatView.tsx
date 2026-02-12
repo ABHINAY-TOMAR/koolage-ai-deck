@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Send, Paperclip, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useGamificationStore } from "@/stores/useGamificationStore";
 
 interface Message {
   id: string;
@@ -12,6 +13,7 @@ interface Message {
 export function ChatView() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const { trackAction } = useGamificationStore();
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -24,6 +26,7 @@ export function ChatView() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    trackAction('chat');
 
     // TODO: Connect to Lovable AI
     // For now, just show a placeholder response

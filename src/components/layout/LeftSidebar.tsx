@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { 
   LayoutGrid, 
   ListMusic, 
   History, 
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
@@ -14,6 +16,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { GamificationPanel } from "@/components/gamification";
 
 const navItems = [
   { icon: LayoutGrid, label: "Gallery", id: "gallery" },
@@ -23,6 +26,7 @@ const navItems = [
 
 export function LeftSidebar() {
   const { leftSidebarOpen, toggleLeftSidebar } = useAppStore();
+  const [showGamification, setShowGamification] = useState(false);
 
   return (
     <aside
@@ -72,8 +76,37 @@ export function LeftSidebar() {
         ))}
       </nav>
 
-      {/* Settings at bottom */}
-      <div className="border-t border-sidebar-border p-2">
+      {/* Gamification Panel (expandable) */}
+      {leftSidebarOpen && showGamification && (
+        <div className="flex-1 overflow-hidden border-t border-sidebar-border">
+          <GamificationPanel />
+        </div>
+      )}
+
+      {/* Bottom actions */}
+      <div className="border-t border-sidebar-border p-2 space-y-1">
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              onClick={() => leftSidebarOpen && setShowGamification(!showGamification)}
+              className={cn(
+                "w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                !leftSidebarOpen && "justify-center px-2",
+                showGamification && leftSidebarOpen && "bg-sidebar-accent"
+              )}
+            >
+              <Trophy className="h-5 w-5 shrink-0 text-spark" />
+              {leftSidebarOpen && <span>Quests & Stats</span>}
+            </Button>
+          </TooltipTrigger>
+          {!leftSidebarOpen && (
+            <TooltipContent side="right" className="font-medium">
+              Quests & Stats
+            </TooltipContent>
+          )}
+        </Tooltip>
+
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
             <Button
