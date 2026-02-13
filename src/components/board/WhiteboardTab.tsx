@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useAI } from '@/hooks/useAI';
+import { useGamificationStore } from '@/stores/useGamificationStore';
 
 interface WhiteboardTabProps {
   tabId: string;
@@ -47,6 +48,7 @@ export function WhiteboardTab({ tabId, initialNodes = [], initialEdges = [], onS
   const [showTopicModal, setShowTopicModal] = useState(false);
   const [topic, setTopic] = useState('');
   const { generateMindMap, isLoading } = useAI();
+  const { trackAction } = useGamificationStore();
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -92,6 +94,7 @@ export function WhiteboardTab({ tabId, initialNodes = [], initialEdges = [], onS
       setNodes(styledNodes);
       setEdges(result.edges);
       onSave?.(styledNodes, result.edges);
+      trackAction('mindmap');
     }
     
     setTopic('');

@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAI } from '@/hooks/useAI';
+import { useGamificationStore } from '@/stores/useGamificationStore';
 
 interface Slide {
   id: string;
@@ -43,6 +44,7 @@ export function SlideTab({ tabId, initialSlides = [], onSave }: SlideTabProps) {
   const [topic, setTopic] = useState('');
   const [style, setStyle] = useState<SlideStyle>('professional');
   const { generateSlides, isLoading } = useAI();
+  const { trackAction } = useGamificationStore();
 
   const activeSlide = slides.find((s) => s.id === activeSlideId);
 
@@ -90,6 +92,7 @@ export function SlideTab({ tabId, initialSlides = [], onSave }: SlideTabProps) {
       setSlides(result.slides);
       setActiveSlideId(result.slides[0].id);
       onSave?.(result.slides);
+      trackAction('slides');
     }
     
     setTopic('');
