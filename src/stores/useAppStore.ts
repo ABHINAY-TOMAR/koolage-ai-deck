@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type AppMode = 'chat' | 'board' | 'explore';
+export type AppMode = 'chat' | 'board' | 'explore' | 'rewards';
 export type BoardTabType = 'whiteboard' | 'slide' | 'page' | 'sheet';
 
 export interface BoardTab {

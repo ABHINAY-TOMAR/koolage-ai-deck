@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Send, Paperclip, Sparkles } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Send, Paperclip, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useGamificationStore } from "@/stores/useGamificationStore";
+import { useAI } from "@/hooks/useAI";
 
 interface Message {
   id: string;
@@ -14,9 +15,15 @@ export function ChatView() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const { trackAction } = useGamificationStore();
+  const { streamChat, isLoading } = useAI();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -24,20 +31,29 @@ export function ChatView() {
       content: input,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput("");
     trackAction('chat');
 
-    // TODO: Connect to Lovable AI
-    // For now, just show a placeholder response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "I'm your Kolage AI assistant! Once connected, I can help you generate mind maps, create slide decks, and expand your notes. What would you like to work on today?",
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    }, 500);
+    // Create placeholder for assistant
+    const assistantId = (Date.now() + 1).toString();
+    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "" }]);
+
+    // Stream AI response
+    const chatMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
+    
+    await streamChat(
+      chatMessages,
+      (token) => {
+        setMessages(prev =>
+          prev.map(m => m.id === assistantId ? { ...m, content: m.content + token } : m)
+        );
+      },
+      () => {
+        // Done streaming
+      }
+    );
   };
 
   return (
@@ -87,10 +103,15 @@ export function ChatView() {
                       : "bg-paper-elevated shadow-desk"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  {message.content ? (
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  ) : (
+                    <Loader2 className="h-4 w-4 animate-spin text-ink-faint" />
+                  )}
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </div>
@@ -120,10 +141,14 @@ export function ChatView() {
             <Button
               size="icon"
               onClick={handleSend}
-              disabled={!input.trim()}
+              disabled={!input.trim() || isLoading}
               className="h-9 w-9 shrink-0 rounded-xl bg-spark hover:bg-spark/90"
             >
-              <Send className="h-4 w-4" />
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </Button>
           </div>
           

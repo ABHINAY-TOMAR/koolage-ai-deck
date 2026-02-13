@@ -4,7 +4,8 @@ import {
   Compass,
   Flame,
   Coins,
-  User
+  User,
+  ShoppingBag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore, AppMode } from "@/stores/useAppStore";
@@ -20,6 +21,7 @@ const modeItems: { mode: AppMode; icon: typeof MessageSquare; label: string }[] 
   { mode: "chat", icon: MessageSquare, label: "Chat" },
   { mode: "board", icon: LayoutDashboard, label: "Board" },
   { mode: "explore", icon: Compass, label: "Explore" },
+  { mode: "rewards", icon: ShoppingBag, label: "Shop" },
 ];
 
 export function TopNav() {
